@@ -114,12 +114,26 @@ body {
   width: 100%;
 }
 
-/* ── Floor Call Buttons (External buttons beside each elevator) ── */
+/* ── Floor Number & Call Buttons ───────────────────────────────── */
+.floor-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  width: 32px;
+  display: inline-block;
+  flex-shrink: 0;
+  text-align: left;
+}
+
 .floor-call-btns {
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 28px 28px;
   gap: 4px;
+  width: 60px;
+  flex-shrink: 0;
   margin: 0 0.5rem;
+  align-items: center;
 }
 
 .floor-call-btn {
@@ -164,6 +178,8 @@ body {
   width: 28px;
   height: 24px;
   display: inline-block;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* ── Elevator Panel ───────────────────────────────────────────── */
