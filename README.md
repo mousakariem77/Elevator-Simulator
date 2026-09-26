@@ -15,16 +15,17 @@ Simulates an office building with **3 elevators operating in parallel across 10 
   - Elevators traveling UP only stop for UP requests ahead of their current floor.
   - Elevators traveling DOWN only stop for DOWN requests ahead of their current floor.
   - Opposite-direction requests are never picked up mid-run; they are allocated to a counter-moving car or queued for the return trip.
-- **Centralized Hallway Call Station**:
-  - Single building-wide panel on the left (Floors 1–10) with ▲ (Up) and ▼ (Down) buttons.
-  - Real-time indicator badges (`E1`, `E2`, `E3`) display which elevator is dispatched to each floor.
-- **Independent In-Cabin Controls**:
-  - Each elevator includes a dedicated **Cabin Keypad (1–10)** to send that car directly to any floor.
-  - Interactive floor shafts allow clicking any floor row to dispatch that specific elevator.
+- **Per-Elevator Floor Call Stations (Real-World Architecture)**:
+  - External call buttons integrated directly onto each floor row of each elevator shaft.
+  - Floor 10 features only ▼ (Down); Floor 1 features only ▲ (Up); Floors 2–9 feature both ▲ and ▼.
+  - Pixel-perfect vertical alignment across all floors.
+- **Unified In-Cabin Keypad (Select Destination Floor)**:
+  - Permanent in-cabin keypad with realistic auto-lock mechanism (`🔒 LOCKED · EMPTY` when doors are closed and idle).
+  - Automatically unlocks (`● BOARDED · READY`) upon elevator arrival and passenger boarding.
+  - Remains active while passengers are riding inside during transit (`● RIDING · IN-CABIN ACTIVE`), allowing passengers to queue additional stops mid-run.
 - **Door State Machine**:
   - Auto-open on arrival, 3-second auto-close timer.
   - Manual controls: **◄ ► Open** (holds door open) and **► ◄ Close** (closes door immediately).
-  - Destination selection panel pops up upon passenger boarding.
 
 ---
 
@@ -139,32 +140,33 @@ Open your browser at `http://localhost:5173`.
 
 ## 🧪 Verification Scenarios
 
-### Scenario 1: Parallel Multi-Car Dispatch
-1. In the **Hallway Calls** panel on the left, press **▲** on **Floor 5**.
+### Scenario 1: Parallel Multi-Car Operation
+1. On **Elevator 1**, press **▲** on **Floor 5**.
    - Elevator 1 responds and starts traveling to Floor 5.
-2. Immediately press **▲** on **Floor 7**.
-   - Elevator 2 is dispatched in parallel to serve Floor 7.
-3. Immediately press **▲** on **Floor 8**.
-   - Elevator 3 is dispatched in parallel to serve Floor 8.
-4. *Result*: All 3 elevators operate concurrently, eliminating passenger wait times.
+2. Immediately on **Elevator 2**, press **▲** on **Floor 7**.
+   - Elevator 2 responds and travels in parallel to Floor 7.
+3. Immediately on **Elevator 3**, press **▲** on **Floor 8**.
+   - Elevator 3 responds and travels in parallel to Floor 8.
+4. *Result*: All 3 elevators operate concurrently in parallel.
 
 ### Scenario 2: SCAN Intermediate Pickup ("On the Way")
 1. Elevator 1 is traveling UP from Floor 1 to Floor 8.
-2. Press **▲** on **Floor 4**.
-3. *Result*: Elevator 1 detects that Floor 4 lies directly along its active UP path and smoothly inserts a pickup stop at Floor 4 before proceeding to Floor 8.
+2. On Elevator 1, press **▲** on **Floor 4**.
+3. *Result*: Elevator 1 detects that Floor 4 lies directly along its active UP path and smoothly inserts a stop at Floor 4 before proceeding to Floor 8.
 
 ### Scenario 3: Direction Rule Enforcement
 1. Elevator 1 is traveling UP from Floor 1 to Floor 10.
-2. In the Hallway Calls panel, press **▼** on **Floor 5**.
-3. *Result*: Elevator 1 does NOT stop at Floor 5 on its upward run. The call is either delegated to an idle car moving down or serviced when Elevator 1 begins its downward run.
+2. On Elevator 1, press **▼** on **Floor 5**.
+3. *Result*: Elevator 1 does NOT stop at Floor 5 on its upward run. The call is queued for Elevator 1's return trip down.
 
-### Scenario 4: Direct Cabin Control
-1. In Elevator 2's panel, click button **4** on its **Cabin Control keypad**.
-2. *Result*: Elevator 2 immediately departs for Floor 4 independently.
+### Scenario 4: In-Cabin Destination Keypad
+1. Call Elevator 2 to Floor 1. When doors open, the **Select Destination Floor** keypad unlocks (`● Boarded · Ready`).
+2. Click button **6**.
+3. *Result*: Floor 6 is queued, doors close, and Elevator 2 proceeds to Floor 6.
 
 ### Scenario 5: Door Mechanics
 1. When an elevator arrives, its door opens for 3 seconds.
-2. Click **◄ ► Open** to hold the door open.
+2. Click **◄ ► Open** to hold the door open (resets auto-close timer).
 3. Click **► ◄ Close** to immediately close the door and resume movement.
 
 ---
