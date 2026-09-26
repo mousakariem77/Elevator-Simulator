@@ -79,13 +79,14 @@ class Elevator {
     if (exists) return;
 
     this._stopQueue.push({ floor, type, requestId });
-    this._sortQueue();
 
-    // If elevator was idle, determine direction toward first stop
+    // If elevator was idle, determine direction toward first stop BEFORE sorting
     if (this._status === Elevator.STATUS.IDLE) {
-      this._setDirectionToward(this._stopQueue[0].floor);
+      this._setDirectionToward(floor);
       this._status = Elevator.STATUS.MOVING;
     }
+
+    this._sortQueue();
   }
 
   /**
@@ -112,25 +113,40 @@ class Elevator {
       return null;
     }
 
-    // ── Case 3: Move one floor toward next stop ───────────────────────────────
+    // ── Case 3: Already at a scheduled stop floor ─────────────────────────────
+    const atFloorIndex = this._stopQueue.findIndex(s => s.floor === this._currentFloor);
+    if (atFloorIndex !== -1) {
+      const arrived = this._stopQueue.splice(atFloorIndex, 1)[0];
+      this.openDoor();
+      this._sortQueue();
+      return arrived;
+    }
+
+    // ── Case 4: Move one floor toward next stop ───────────────────────────────
+    if (this._direction === Elevator.DIRECTION.IDLE) {
+      this._setDirectionToward(this._stopQueue[0].floor);
+    }
+
+    this._sortQueue();
     const nextStop = this._stopQueue[0];
 
-    if (this._currentFloor < nextStop.floor) {
+    if (nextStop.floor > this._currentFloor) {
       this._currentFloor++;
       this._direction = Elevator.DIRECTION.UP;
       this._status    = Elevator.STATUS.MOVING;
-    } else if (this._currentFloor > nextStop.floor) {
+    } else if (nextStop.floor < this._currentFloor) {
       this._currentFloor--;
       this._direction = Elevator.DIRECTION.DOWN;
       this._status    = Elevator.STATUS.MOVING;
     }
 
-    // ── Case 4: Arrived at next stop ──────────────────────────────────────────
-    if (this._currentFloor === nextStop.floor) {
-      const arrived = this._stopQueue.shift(); // remove from queue
+    // Check if the floor just reached is a scheduled stop
+    const arrivedIndex = this._stopQueue.findIndex(s => s.floor === this._currentFloor);
+    if (arrivedIndex !== -1) {
+      const arrived = this._stopQueue.splice(arrivedIndex, 1)[0];
       this.openDoor();
-      this._sortQueue(); // re-sort remaining stops
-      return arrived;   // caller (ElevatorSystem) uses this to handle the event
+      this._sortQueue();
+      return arrived;
     }
 
     return null;
@@ -150,14 +166,16 @@ class Elevator {
    */
   closeDoor() {
     this._doorState = Elevator.DOOR_STATE.CLOSED;
+    this._doorOpenTicks = 0;
+
     if (this._stopQueue.length > 0) {
-      this._status    = Elevator.STATUS.MOVING;
+      this._sortQueue();
       this._setDirectionToward(this._stopQueue[0].floor);
+      this._status = Elevator.STATUS.MOVING;
     } else {
       this._status    = Elevator.STATUS.IDLE;
       this._direction = Elevator.DIRECTION.IDLE;
     }
-    this._doorOpenTicks = 0;
   }
 
   /**
@@ -310,15 +328,38 @@ class Elevator {
 
   /**
    * Sort the stop queue based on current direction (SCAN algorithm).
-   * Going UP  → sort ascending (lowest first)
-   * Going DOWN → sort descending (highest first)
-   * IDLE       → sort by distance to current floor
+   * Going UP:
+   *   1. Ahead stops (floor >= currentFloor) sorted ASCENDING (5, 6, 7, 8...)
+   *   2. Behind stops (floor < currentFloor) sorted DESCENDING (4, 3, 2, 1...) for return trip
+   * Going DOWN:
+   *   1. Below stops (floor <= currentFloor) sorted DESCENDING (4, 3, 2, 1...)
+   *   2. Above stops (floor > currentFloor) sorted ASCENDING (5, 6, 7, 8...) for return trip
+   * IDLE:
+   *   Sorted by distance to current floor
    */
   _sortQueue() {
+    if (this._stopQueue.length <= 1) return;
+
     if (this._direction === Elevator.DIRECTION.UP) {
-      this._stopQueue.sort((a, b) => a.floor - b.floor);
+      const ahead = this._stopQueue
+        .filter(s => s.floor >= this._currentFloor)
+        .sort((a, b) => a.floor - b.floor);
+
+      const behind = this._stopQueue
+        .filter(s => s.floor < this._currentFloor)
+        .sort((a, b) => b.floor - a.floor);
+
+      this._stopQueue = [...ahead, ...behind];
     } else if (this._direction === Elevator.DIRECTION.DOWN) {
-      this._stopQueue.sort((a, b) => b.floor - a.floor);
+      const below = this._stopQueue
+        .filter(s => s.floor <= this._currentFloor)
+        .sort((a, b) => b.floor - a.floor);
+
+      const above = this._stopQueue
+        .filter(s => s.floor > this._currentFloor)
+        .sort((a, b) => a.floor - b.floor);
+
+      this._stopQueue = [...below, ...above];
     } else {
       // IDLE: nearest first
       this._stopQueue.sort(

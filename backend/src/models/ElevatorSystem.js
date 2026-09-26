@@ -63,6 +63,28 @@ class ElevatorSystem {
   }
 
   /**
+   * Process a call directly targeted at a specific elevator (e.g. external button beside that elevator).
+   *
+   * @param {number} elevatorId - Target elevator ID (1, 2, 3)
+   * @param {number} floor      - Floor the passenger is calling from
+   * @param {string} direction  - 'up' | 'down'
+   * @returns {Request|null}
+   */
+  callElevatorCar(elevatorId, floor, direction) {
+    const elevator = this._getElevator(elevatorId);
+    if (!elevator) return null;
+
+    const request = new Request(floor, direction);
+    this._requests.set(request.id, request);
+    request.assign(elevator.id);
+
+    elevator.addStop(floor, 'pickup', request.id);
+    elevator.trackRequest(request.id);
+
+    return request;
+  }
+
+  /**
    * Set the destination floor for a passenger who has boarded an elevator.
    *
    * @param {number} elevatorId       - The elevator ID (1, 2, 3)

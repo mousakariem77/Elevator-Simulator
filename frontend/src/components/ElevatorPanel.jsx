@@ -1,5 +1,4 @@
 import FloorRow from './FloorRow';
-import DestinationPanel from './DestinationPanel';
 
 const DIRECTION_ICON = { up: '↑ UP', down: '↓ DOWN', idle: '— IDLE' };
 const STATUS_LABEL   = { idle: 'IDLE', moving: 'MOVING', door_open: 'DOOR OPEN' };
@@ -8,16 +7,22 @@ const STATUS_LABEL   = { idle: 'IDLE', moving: 'MOVING', door_open: 'DOOR OPEN' 
  * ElevatorPanel — Full visual representation of one elevator unit.
  *
  * Props:
- *   elevator           {object}   - Elevator state from backend
- *   awaitingDestination {object}  - { requestId, pickupFloor } if waiting for destination
- *   onDirectCall       {function} - (elevatorId, floor) => void
- *   onSetDestination   {function} - (elevatorId, requestId, floor) => void
- *   onOpenDoor         {function} - (elevatorId) => void
- *   onCloseDoor        {function} - (elevatorId) => void
+ *   elevator            {object}   - Elevator state from backend
+ *   awaitingDestination {object}   - { requestId, pickupFloor } if waiting for destination
+ *   pendingCalls        {object}   - { up: Set, down: Set } active calls for this elevator
+ *   onCallUp            {function} - (elevatorId, floor) => void
+ *   onCallDown          {function} - (elevatorId, floor) => void
+ *   onDirectCall        {function} - (elevatorId, floor) => void
+ *   onSetDestination    {function} - (elevatorId, requestId, floor) => void
+ *   onOpenDoor          {function} - (elevatorId) => void
+ *   onCloseDoor         {function} - (elevatorId) => void
  */
 export default function ElevatorPanel({
   elevator,
   awaitingDestination,
+  pendingCalls,
+  onCallUp,
+  onCallDown,
   onDirectCall,
   onSetDestination,
   onOpenDoor,
@@ -34,7 +39,20 @@ export default function ElevatorPanel({
   } = elevator;
 
   const isDoorOpen = status === 'door_open';
+  const isAwaiting = Boolean(awaitingDestination);
+  // Keypad is only unlocked when the elevator door is open for passenger boarding
+  const isKeypadUnlocked = isDoorOpen;
+
   const floors = Array.from({ length: 10 }, (_, i) => 10 - i); // 10 down to 1
+
+  const handleSelectFloor = (floor) => {
+    if (!isKeypadUnlocked || floor === currentFloor) return;
+    if (awaitingDestination) {
+      onSetDestination(id, awaitingDestination.requestId, floor);
+    } else {
+      onDirectCall(id, floor);
+    }
+  };
 
   return (
     <div className={`elevator-panel ${isDoorOpen ? 'elevator-panel--door-open' : ''}`}>
@@ -74,20 +92,37 @@ export default function ElevatorPanel({
         </button>
       </div>
 
-      {/* ── In-Cabin Keypad (Direct floor command for this elevator) ────────── */}
-      <div className="cabin-controls">
-        <div className="cabin-controls-title">🎮 Cabin Control (Elevator {id})</div>
+      {/* ── Unified In-Cabin Destination Keypad (Always Visible, Disabled When Closed) ─ */}
+      <div className={`cabin-controls ${isKeypadUnlocked ? 'cabin-controls--active' : 'cabin-controls--locked'}`}>
+        <div className="cabin-controls-header">
+          <span className="cabin-controls-title">Select Destination Floor</span>
+          <span className={`cabin-status-badge ${isKeypadUnlocked ? 'cabin-status-badge--active' : 'cabin-status-badge--locked'}`}>
+            {isKeypadUnlocked
+              ? (isAwaiting ? '● Boarded · Ready' : '● Door Open')
+              : '🔒 Locked'}
+          </span>
+        </div>
+
         <div className="cabin-grid">
           {floors.map(floor => {
             const isCur = currentFloor === floor;
             const isQueued = stopQueue.some(s => s.floor === floor);
+            const isDisabled = !isKeypadUnlocked || isCur;
+
             return (
               <button
                 key={floor}
                 id={`cabin-${id}-floor-${floor}`}
                 className={`cabin-btn ${isCur ? 'cabin-btn--current' : ''} ${isQueued ? 'cabin-btn--queued' : ''}`}
-                onClick={() => onDirectCall(id, floor)}
-                title={`Send Elevator ${id} to Floor ${floor}`}
+                disabled={isDisabled}
+                onClick={() => handleSelectFloor(floor)}
+                title={
+                  isCur
+                    ? `Current Floor (${floor}F)`
+                    : !isKeypadUnlocked
+                    ? 'Cabin keypad is locked while doors are closed. Call elevator outside to board.'
+                    : `Select Floor ${floor} as destination`
+                }
               >
                 {floor}
               </button>
@@ -95,16 +130,6 @@ export default function ElevatorPanel({
           })}
         </div>
       </div>
-
-      {/* ── Destination Panel (shown when elevator waits for passenger input) */}
-      {awaitingDestination && isDoorOpen && (
-        <DestinationPanel
-          elevatorId={id}
-          pickupFloor={awaitingDestination.pickupFloor}
-          requestId={awaitingDestination.requestId}
-          onSelect={onSetDestination}
-        />
-      )}
 
       {/* ── Stop Queue Indicator ───────────────────────────────────────────── */}
       {stopQueue.length > 0 && (
@@ -118,7 +143,7 @@ export default function ElevatorPanel({
         </div>
       )}
 
-      {/* ── Elevator Shaft ─────────────────────────────────────────────────── */}
+      {/* ── Elevator Shaft with Hallway Call Buttons on Each Floor ───────────── */}
       <div className="floor-shaft">
         {floors.map(floor => (
           <FloorRow
@@ -128,6 +153,10 @@ export default function ElevatorPanel({
             isCurrentFloor={currentFloor === floor}
             isDoorOpen={isDoorOpen && currentFloor === floor}
             stopQueue={stopQueue}
+            isPendingUp={pendingCalls?.up?.has(floor)}
+            isPendingDown={pendingCalls?.down?.has(floor)}
+            onCallUp={onCallUp}
+            onCallDown={onCallDown}
             onDirectCall={() => onDirectCall(id, floor)}
           />
         ))}

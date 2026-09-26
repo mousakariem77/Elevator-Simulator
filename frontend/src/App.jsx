@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from 'react';
-import HallwayPanel from './components/HallwayPanel';
 import ElevatorPanel from './components/ElevatorPanel';
 import { useElevator } from './hooks/useElevator';
 import './App.css';
@@ -11,45 +10,65 @@ export default function App() {
     pendingQueue,
     arrivals,
     awaitingDestination,
-    callElevator,
+    callElevatorCar,
     setDestination,
     openDoor,
     closeDoor,
     directCall,
   } = useElevator();
 
-  // Track active hallway calls
-  const [pendingCalls, setPendingCalls] = useState({ up: new Set(), down: new Set() });
+  // Track active hallway calls per elevator: { [id]: { up: Set(), down: Set() } }
+  const [pendingCalls, setPendingCalls] = useState({
+    1: { up: new Set(), down: new Set() },
+    2: { up: new Set(), down: new Set() },
+    3: { up: new Set(), down: new Set() },
+  });
 
   // Clear pending highlight when an elevator arrives at the floor
   useEffect(() => {
     if (arrivals.length > 0) {
       const latest = arrivals[0];
       setPendingCalls(prev => {
-        const nextUp = new Set(prev.up);
-        const nextDown = new Set(prev.down);
+        const carCalls = prev[latest.elevatorId] || { up: new Set(), down: new Set() };
+        const nextUp = new Set(carCalls.up);
+        const nextDown = new Set(carCalls.down);
         nextUp.delete(latest.floor);
         nextDown.delete(latest.floor);
-        return { up: nextUp, down: nextDown };
+        return {
+          ...prev,
+          [latest.elevatorId]: { up: nextUp, down: nextDown },
+        };
       });
     }
   }, [arrivals]);
 
-  const handleCallUp = useCallback((floor) => {
-    callElevator(floor, 'up');
-    setPendingCalls(prev => ({
-      ...prev,
-      up: new Set([...prev.up, floor]),
-    }));
-  }, [callElevator]);
+  const handleCallUp = useCallback((elevatorId, floor) => {
+    callElevatorCar(elevatorId, floor, 'up');
+    setPendingCalls(prev => {
+      const carCalls = prev[elevatorId] || { up: new Set(), down: new Set() };
+      return {
+        ...prev,
+        [elevatorId]: {
+          ...carCalls,
+          up: new Set([...carCalls.up, floor]),
+        },
+      };
+    });
+  }, [callElevatorCar]);
 
-  const handleCallDown = useCallback((floor) => {
-    callElevator(floor, 'down');
-    setPendingCalls(prev => ({
-      ...prev,
-      down: new Set([...prev.down, floor]),
-    }));
-  }, [callElevator]);
+  const handleCallDown = useCallback((elevatorId, floor) => {
+    callElevatorCar(elevatorId, floor, 'down');
+    setPendingCalls(prev => {
+      const carCalls = prev[elevatorId] || { up: new Set(), down: new Set() };
+      return {
+        ...prev,
+        [elevatorId]: {
+          ...carCalls,
+          down: new Set([...carCalls.down, floor]),
+        },
+      };
+    });
+  }, [callElevatorCar]);
 
   const handleSetDestination = useCallback((elevatorId, requestId, floor) => {
     setDestination(elevatorId, requestId, floor);
@@ -76,23 +95,17 @@ export default function App() {
         </div>
       </header>
 
-      {/* ── Main Layout: Hallway Panel + 3 Elevators ───────────────────────── */}
+      {/* ── Main Layout: 3 Independent Elevators Side-by-Side ──────────────── */}
       <main className="simulator-layout">
-        {/* Central Hallway Calls */}
-        <HallwayPanel
-          pendingCalls={pendingCalls}
-          elevators={elevators}
-          onCallUp={handleCallUp}
-          onCallDown={handleCallDown}
-        />
-
-        {/* 3 Elevators Side-by-Side */}
         <div className="elevator-grid">
           {elevators.map(elevator => (
             <ElevatorPanel
               key={elevator.id}
               elevator={elevator}
               awaitingDestination={awaitingDestination[elevator.id] || null}
+              pendingCalls={pendingCalls[elevator.id] || { up: new Set(), down: new Set() }}
+              onCallUp={handleCallUp}
+              onCallDown={handleCallDown}
               onDirectCall={handleDirectCall}
               onSetDestination={handleSetDestination}
               onOpenDoor={openDoor}
@@ -104,7 +117,7 @@ export default function App() {
 
       {/* ── Footer ─────────────────────────────────────────────────────────── */}
       <footer className="app-footer">
-        <span>3 Elevators · 10 Floors · SCAN Algorithm & Parallel Dispatch</span>
+        <span>3 Elevators · 10 Floors · SCAN Algorithm & Independent Floor Stations</span>
       </footer>
     </div>
   );

@@ -88,6 +88,27 @@ function registerElevatorSocket(io, system) {
       io.emit('system:state', system.getSystemState());
     });
 
+    // ── elevator:callFloor ────────────────────────────────────────────────────
+    // Passenger calls a specific elevator from a floor button outside that car
+    socket.on('elevator:callFloor', ({ elevatorId, floor, direction }) => {
+      if (
+        typeof elevatorId !== 'number' ||
+        typeof floor !== 'number' ||
+        floor < 1 || floor > 10 ||
+        !['up', 'down'].includes(direction)
+      ) {
+        socket.emit('error', { message: 'Invalid elevator:callFloor payload' });
+        return;
+      }
+
+      const request = system.callElevatorCar(elevatorId, floor, direction);
+      if (request) {
+        console.log(`[System] Car call: Elevator ${elevatorId} -> Floor ${floor} (${direction}) req=${request.id}`);
+        socket.emit('request:created', { request: request.toJSON() });
+      }
+      io.emit('system:state', system.getSystemState());
+    });
+
     // ── elevator:directCall ───────────────────────────────────────────────────
     // Direct command to send a specific elevator to a floor (In-cabin control / test)
     socket.on('elevator:directCall', ({ elevatorId, floor }) => {

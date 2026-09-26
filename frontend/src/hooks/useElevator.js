@@ -98,6 +98,11 @@ export function useElevator() {
     socketRef.current?.emit('door:close', { elevatorId });
   }, []);
 
+  /** Call a specific elevator to a floor in a given direction */
+  const callElevatorCar = useCallback((elevatorId, floor, direction) => {
+    socketRef.current?.emit('elevator:callFloor', { elevatorId, floor, direction });
+  }, []);
+
   /** Directly send a specific elevator to a floor (In-cabin control / manual test) */
   const directCall = useCallback((elevatorId, floor) => {
     socketRef.current?.emit('elevator:directCall', { elevatorId, floor });
@@ -110,6 +115,7 @@ export function useElevator() {
     arrivals,
     awaitingDestination,
     callElevator,
+    callElevatorCar,
     setDestination,
     openDoor,
     closeDoor,
