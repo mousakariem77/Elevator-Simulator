@@ -39,9 +39,12 @@ export default function ElevatorPanel({
   } = elevator;
 
   const isDoorOpen = status === 'door_open';
+  const isMoving   = status === 'moving';
+  const hasStops   = stopQueue.length > 0;
   const isAwaiting = Boolean(awaitingDestination);
-  // Keypad is only unlocked when the elevator door is open for passenger boarding
-  const isKeypadUnlocked = isDoorOpen;
+
+  // Keypad is active if doors are open OR if elevator is currently in transit with passengers inside
+  const isKeypadUnlocked = isDoorOpen || isMoving || hasStops;
 
   const floors = Array.from({ length: 10 }, (_, i) => 10 - i); // 10 down to 1
 
@@ -98,8 +101,10 @@ export default function ElevatorPanel({
           <span className="cabin-controls-title">Select Destination Floor</span>
           <span className={`cabin-status-badge ${isKeypadUnlocked ? 'cabin-status-badge--active' : 'cabin-status-badge--locked'}`}>
             {isKeypadUnlocked
-              ? (isAwaiting ? '● Boarded · Ready' : '● Door Open')
-              : '🔒 Locked'}
+              ? (isDoorOpen
+                  ? (isAwaiting ? '● Boarded · Ready' : '● Door Open')
+                  : '● Riding · In-Cabin Active')
+              : '🔒 Locked · Empty'}
           </span>
         </div>
 
@@ -120,7 +125,7 @@ export default function ElevatorPanel({
                   isCur
                     ? `Current Floor (${floor}F)`
                     : !isKeypadUnlocked
-                    ? 'Cabin keypad is locked while doors are closed. Call elevator outside to board.'
+                    ? 'Cabin keypad is locked while empty. Call elevator outside to board.'
                     : `Select Floor ${floor} as destination`
                 }
               >
