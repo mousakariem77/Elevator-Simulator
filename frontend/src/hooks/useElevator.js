@@ -4,7 +4,7 @@ import { io } from 'socket.io-client';
 const BACKEND_URL = 'http://localhost:3001';
 
 /**
- * useElevator — Custom hook that manages the Socket.io connection
+ * useElevator - Custom hook that manages the Socket.io connection
  * and exposes all elevator system interactions to React components.
  */
 export function useElevator() {

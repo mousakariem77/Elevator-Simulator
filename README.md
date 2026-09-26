@@ -98,13 +98,11 @@ elevator-simulator/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── HallwayPanel.jsx         # Building corridor call station (Floors 1–10)
-│   │   │   ├── ElevatorPanel.jsx        # Elevator column with status & Cabin Keypad
-│   │   │   ├── FloorRow.jsx             # Shaft row with car position & stop indicator
-│   │   │   └── DestinationPanel.jsx     # Boarding destination selector
+│   │   │   ├── ElevatorPanel.jsx        # Elevator column with in-cabin destination keypad
+│   │   │   └── FloorRow.jsx             # Shaft row with external call buttons & car position
 │   │   ├── hooks/
 │   │   │   └── useElevator.js           # Socket.io client state & actions
-│   │   ├── App.jsx                      # Main dashboard layout
+│   │   ├── App.jsx                      # Main 3-elevator dashboard
 │   │   ├── App.css                      # Modern light design system
 │   │   └── main.jsx
 │   ├── index.html

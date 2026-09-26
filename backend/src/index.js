@@ -1,17 +1,17 @@
 require('dotenv').config();
-const express                = require('express');
-const http                   = require('http');
-const { Server }             = require('socket.io');
-const cors                   = require('cors');
-const ElevatorSystem         = require('./models/ElevatorSystem');
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+const cors = require('cors');
+const ElevatorSystem = require('./models/ElevatorSystem');
 const registerElevatorSocket = require('./socket/elevatorSocket');
 
 // ── App setup ──────────────────────────────────────────────────────────────────
-const app    = express();
+const app = express();
 const server = http.createServer(app);
 
-const PORT          = process.env.PORT || 3001;
-const FRONTEND_URL  = process.env.FRONTEND_URL || 'http://localhost:5173';
+const PORT = process.env.PORT || 3001;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 // ── Middleware ─────────────────────────────────────────────────────────────────
 app.use(cors({ origin: FRONTEND_URL }));
@@ -31,7 +31,7 @@ const system = new ElevatorSystem();
 // Register all socket events
 registerElevatorSocket(io, system);
 
-// ── REST endpoints (optional — useful for health check / debugging) ────────────
+// ── REST endpoints (optional - useful for health check / debugging) ────────────
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() });
 });

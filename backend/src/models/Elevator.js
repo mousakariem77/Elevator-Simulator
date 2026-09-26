@@ -1,5 +1,5 @@
 /**
- * Elevator — Core OOP class representing a single elevator unit.
+ * Elevator - Core OOP class representing a single elevator unit.
  *
  * OOP Principles applied:
  *  - Encapsulation  : All internal state is private (_prefixed). Modified only via methods.
@@ -8,19 +8,19 @@
  */
 class Elevator {
   static DIRECTION = {
-    UP:   'up',
+    UP: 'up',
     DOWN: 'down',
     IDLE: 'idle',
   };
 
   static STATUS = {
-    IDLE:      'idle',
-    MOVING:    'moving',
+    IDLE: 'idle',
+    MOVING: 'moving',
     DOOR_OPEN: 'door_open',
   };
 
   static DOOR_STATE = {
-    OPEN:   'open',
+    OPEN: 'open',
     CLOSED: 'closed',
   };
 
@@ -32,15 +32,15 @@ class Elevator {
    * @param {number} startFloor  - Initial floor position (default: 1)
    */
   constructor(id, startFloor = 1) {
-    this._id           = id;
+    this._id = id;
     this._currentFloor = startFloor;
-    this._direction    = Elevator.DIRECTION.IDLE;
-    this._status       = Elevator.STATUS.IDLE;
-    this._doorState    = Elevator.DOOR_STATE.CLOSED;
+    this._direction = Elevator.DIRECTION.IDLE;
+    this._status = Elevator.STATUS.IDLE;
+    this._doorState = Elevator.DOOR_STATE.CLOSED;
 
     // Sorted list of floors this elevator must stop at
     // Each entry: { floor: number, type: 'pickup' | 'dropoff', requestId: string }
-    this._stopQueue    = [];
+    this._stopQueue = [];
 
     // Door auto-close timer (ticks)
     this._doorOpenTicks = 0;
@@ -52,13 +52,13 @@ class Elevator {
 
   // ─── Getters (Encapsulation) ─────────────────────────────────────────────────
 
-  get id()           { return this._id; }
+  get id() { return this._id; }
   get currentFloor() { return this._currentFloor; }
-  get direction()    { return this._direction; }
-  get status()       { return this._status; }
-  get doorState()    { return this._doorState; }
-  get stopQueue()    { return [...this._stopQueue]; }
-  get isIdle()       { return this._status === Elevator.STATUS.IDLE && this._stopQueue.length === 0; }
+  get direction() { return this._direction; }
+  get status() { return this._status; }
+  get doorState() { return this._doorState; }
+  get stopQueue() { return [...this._stopQueue]; }
+  get isIdle() { return this._status === Elevator.STATUS.IDLE && this._stopQueue.length === 0; }
 
   // ─── Public Interface ────────────────────────────────────────────────────────
 
@@ -106,10 +106,10 @@ class Elevator {
       return null;
     }
 
-    // ── Case 2: No stops — go idle ────────────────────────────────────────────
+    // ── Case 2: No stops - go idle ────────────────────────────────────────────
     if (this._stopQueue.length === 0) {
       this._direction = Elevator.DIRECTION.IDLE;
-      this._status    = Elevator.STATUS.IDLE;
+      this._status = Elevator.STATUS.IDLE;
       return null;
     }
 
@@ -133,11 +133,11 @@ class Elevator {
     if (nextStop.floor > this._currentFloor) {
       this._currentFloor++;
       this._direction = Elevator.DIRECTION.UP;
-      this._status    = Elevator.STATUS.MOVING;
+      this._status = Elevator.STATUS.MOVING;
     } else if (nextStop.floor < this._currentFloor) {
       this._currentFloor--;
       this._direction = Elevator.DIRECTION.DOWN;
-      this._status    = Elevator.STATUS.MOVING;
+      this._status = Elevator.STATUS.MOVING;
     }
 
     // Check if the floor just reached is a scheduled stop
@@ -156,8 +156,8 @@ class Elevator {
    * Open the elevator door.
    */
   openDoor() {
-    this._doorState    = Elevator.DOOR_STATE.OPEN;
-    this._status       = Elevator.STATUS.DOOR_OPEN;
+    this._doorState = Elevator.DOOR_STATE.OPEN;
+    this._status = Elevator.STATUS.DOOR_OPEN;
     this._doorOpenTicks = 0;
   }
 
@@ -173,7 +173,7 @@ class Elevator {
       this._setDirectionToward(this._stopQueue[0].floor);
       this._status = Elevator.STATUS.MOVING;
     } else {
-      this._status    = Elevator.STATUS.IDLE;
+      this._status = Elevator.STATUS.IDLE;
       this._direction = Elevator.DIRECTION.IDLE;
     }
   }
@@ -260,9 +260,9 @@ class Elevator {
       : this._currentFloor;
 
     const remainingCurrentRun = Math.abs(furthest - this._currentFloor);
-    const returnTrip          = Math.abs(furthest - floor);
-    const totalStopsDelay     = this._stopQueue.length * DOOR_TIME;
-    const OPPOSITE_PENALTY    = 20;
+    const returnTrip = Math.abs(furthest - floor);
+    const totalStopsDelay = this._stopQueue.length * DOOR_TIME;
+    const OPPOSITE_PENALTY = 20;
 
     return remainingCurrentRun + returnTrip + totalStopsDelay + OPPOSITE_PENALTY;
   }
@@ -300,12 +300,12 @@ class Elevator {
    */
   getState() {
     return {
-      id:           this._id,
+      id: this._id,
       currentFloor: this._currentFloor,
-      direction:    this._direction,
-      status:       this._status,
-      doorState:    this._doorState,
-      stopQueue:    [...this._stopQueue],
+      direction: this._direction,
+      status: this._status,
+      doorState: this._doorState,
+      stopQueue: [...this._stopQueue],
       activeRequests: [...this._activeRequestIds],
     };
   }

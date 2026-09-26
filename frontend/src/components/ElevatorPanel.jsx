@@ -1,10 +1,10 @@
 import FloorRow from './FloorRow';
 
-const DIRECTION_ICON = { up: '↑ UP', down: '↓ DOWN', idle: '— IDLE' };
-const STATUS_LABEL   = { idle: 'IDLE', moving: 'MOVING', door_open: 'DOOR OPEN' };
+const DIRECTION_ICON = { up: '↑ UP', down: '↓ DOWN', idle: '- IDLE' };
+const STATUS_LABEL = { idle: 'IDLE', moving: 'MOVING', door_open: 'DOOR OPEN' };
 
 /**
- * ElevatorPanel — Full visual representation of one elevator unit.
+ * ElevatorPanel - Full visual representation of one elevator unit.
  *
  * Props:
  *   elevator            {object}   - Elevator state from backend
@@ -39,8 +39,8 @@ export default function ElevatorPanel({
   } = elevator;
 
   const isDoorOpen = status === 'door_open';
-  const isMoving   = status === 'moving';
-  const hasStops   = stopQueue.length > 0;
+  const isMoving = status === 'moving';
+  const hasStops = stopQueue.length > 0;
   const isAwaiting = Boolean(awaitingDestination);
 
   // Keypad is active if doors are open OR if elevator is currently in transit with passengers inside
@@ -102,8 +102,8 @@ export default function ElevatorPanel({
           <span className={`cabin-status-badge ${isKeypadUnlocked ? 'cabin-status-badge--active' : 'cabin-status-badge--locked'}`}>
             {isKeypadUnlocked
               ? (isDoorOpen
-                  ? (isAwaiting ? '● Boarded · Ready' : '● Door Open')
-                  : '● Riding · In-Cabin Active')
+                ? (isAwaiting ? '● Boarded · Ready' : '● Door Open')
+                : '● Riding · In-Cabin Active')
               : '🔒 Locked · Empty'}
           </span>
         </div>
@@ -125,8 +125,8 @@ export default function ElevatorPanel({
                   isCur
                     ? `Current Floor (${floor}F)`
                     : !isKeypadUnlocked
-                    ? 'Cabin keypad is locked while empty. Call elevator outside to board.'
-                    : `Select Floor ${floor} as destination`
+                      ? 'Cabin keypad is locked while empty. Call elevator outside to board.'
+                      : `Select Floor ${floor} as destination`
                 }
               >
                 {floor}

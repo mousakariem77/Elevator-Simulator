@@ -1,5 +1,5 @@
 /**
- * FloorRow — Represents one floor row in an elevator shaft.
+ * FloorRow - Represents one floor row in an elevator shaft.
  * Shows external Hallway call buttons (▲ / ▼) for this specific elevator at this floor,
  * the elevator car presence, door state, and scheduled stop markers.
  *
@@ -13,7 +13,7 @@
  *   isPendingDown  {boolean}  - DOWN call button is illuminated / waiting
  *   onCallUp       {function} - (elevatorId, floor) => void
  *   onCallDown     {function} - (elevatorId, floor) => void
- *   onDirectCall   {function} - () => void — send this elevator to this floor
+ *   onDirectCall   {function} - () => void - send this elevator to this floor
  */
 export default function FloorRow({
   elevatorId,

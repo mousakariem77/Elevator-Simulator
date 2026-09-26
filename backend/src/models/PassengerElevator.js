@@ -1,7 +1,7 @@
 const Elevator = require('./Elevator');
 
 /**
- * PassengerElevator — Subclass of Elevator demonstrating Inheritance and Polymorphism.
+ * PassengerElevator - Subclass of Elevator demonstrating Inheritance and Polymorphism.
  *
  * OOP Principles applied:
  *  - Inheritance  : Inherits core elevator mechanics, movement logic, and door control from Elevator.

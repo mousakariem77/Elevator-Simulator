@@ -114,11 +114,6 @@ export default function App() {
           ))}
         </div>
       </main>
-
-      {/* ── Footer ─────────────────────────────────────────────────────────── */}
-      <footer className="app-footer">
-        <span>3 Elevators · 10 Floors · SCAN Algorithm & Independent Floor Stations</span>
-      </footer>
     </div>
   );
 }

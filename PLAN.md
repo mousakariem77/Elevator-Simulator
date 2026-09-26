@@ -1,8 +1,8 @@
-# 🛗 Elevator Simulator — Implementation Plan
+# 🛗 Elevator Simulator - Implementation Plan
 
-> **Goal**: Elevator Simulator Web App — Node.js (Backend) + React.js (Frontend)
+> **Goal**: Elevator Simulator Web App - Node.js (Backend) + React.js (Frontend)
 > **Constraint**: 2 days implementation
-> **Overall Status**: 🟢 Phase 4 Complete — Ready for Phase 5 Delivery
+> **Overall Status**: 🟢 Phase 4 Complete - Ready for Phase 5 Delivery
 > **Updated**: 2026-09-26 19:35
 
 ---
@@ -55,17 +55,15 @@ D:\Personal\Elevator Simulator\
         ├── App.jsx                  ← Main layout & event wiring
         ├── App.css                  ← Responsive light design system
         ├── components/
-        │   ├── HallwayPanel.jsx     ← Building corridor call station (Floors 1–10)
-        │   ├── ElevatorPanel.jsx    ← Single elevator column with Cabin Keypad
-        │   ├── FloorRow.jsx         ← Elevator shaft floor row indicator
-        │   └── DestinationPanel.jsx ← In-cabin destination selector popup on arrival
+        │   ├── ElevatorPanel.jsx    ← Single elevator column with In-Cabin Destination Keypad
+        │   └── FloorRow.jsx         ← Elevator shaft floor row with external call buttons (▲ / ▼)
         └── hooks/
             └── useElevator.js       ← Socket.io client & state management
 ```
 
 ---
 
-## 📋 PHASE 1 — Backend Architecture & OOP Design
+## 📋 PHASE 1 - Backend Architecture & OOP Design
 
 > **Status**: 🟢 Completed
 
@@ -92,22 +90,22 @@ D:\Personal\Elevator Simulator\
   - `doorState` (`'closed'` | `'open'`)
   - `stopQueue` (sorted floors to serve)
 - [x] Methods:
-  - `addStop(floor, type, requestId)` — inserts and sorts stops via SCAN algorithm
-  - `tick()` — advances 1 floor or handles 3-second door open/close
+  - `addStop(floor, type, requestId)` - inserts and sorts stops via SCAN algorithm
+  - `tick()` - advances 1 floor or handles 3-second door open/close
   - `openDoor()` / `closeDoor()` / `holdDoor()`
-  - `isGoingToward(floor, direction)` — enforces the Direction Rule
-  - `costToServe(floor, direction)` — evaluates true arrival time factoring intermediate stops and door delays
+  - `isGoingToward(floor, direction)` - enforces the Direction Rule
+  - `costToServe(floor, direction)` - evaluates true arrival time factoring intermediate stops and door delays
 
 ### 1.4 Model: `ElevatorSystem.js` (Dispatcher)
 - [x] Class `ElevatorSystem` managing all 3 `Elevator` instances
-- [x] Method `callElevator(floor, direction)` — dispatches request to best elevator
-- [x] Method `sendElevatorToFloor(elevatorId, floor)` — direct cabin command
-- [x] Method `tick()` — drives all 3 elevators in parallel
+- [x] Method `callElevator(floor, direction)` - dispatches request to best elevator
+- [x] Method `sendElevatorToFloor(elevatorId, floor)` - direct cabin command
+- [x] Method `tick()` - drives all 3 elevators in parallel
 - [x] Load-balancing & Round-robin tie-breaker for idle elevators
 
 ---
 
-## 📋 PHASE 2 — Real-time Communication with Socket.io
+## 📋 PHASE 2 - Real-time Communication with Socket.io
 
 > **Status**: 🟢 Completed
 
@@ -126,7 +124,7 @@ D:\Personal\Elevator Simulator\
 
 ---
 
-## 📋 PHASE 3 — Frontend React Application
+## 📋 PHASE 3 - Frontend React Application
 
 > **Status**: 🟢 Completed
 
@@ -141,15 +139,13 @@ D:\Personal\Elevator Simulator\
 - [x] Exposes `callElevator`, `setDestination`, `openDoor`, `closeDoor`, `directCall`
 
 ### 3.3 Component Architecture
-- [x] **`HallwayPanel.jsx`**: Central hallway call station with Floors 1–10 Up/Down buttons and assigned elevator badges (`E1`, `E2`, `E3`)
-- [x] **`ElevatorPanel.jsx`**: Displays elevator status, current floor, door controls, stop queue, and Cabin Keypad (1–10)
-- [x] **`FloorRow.jsx`**: Visual shaft representation showing elevator car position, open doors, and scheduled stops
-- [x] **`DestinationPanel.jsx`**: Popup floor picker when an elevator arrives for passenger boarding
-- [x] **`App.jsx`**: Unifies the layout with 1 Hallway column + 3 Elevator columns side-by-side
+- [x] **`ElevatorPanel.jsx`**: Displays elevator status, current floor, door controls, stop queue, and unified in-cabin destination keypad (1–10)
+- [x] **`FloorRow.jsx`**: Visual shaft representation showing external hallway call buttons (▲ / ▼), elevator car position, open doors, and scheduled stops
+- [x] **`App.jsx`**: Unifies the layout with 3 independent Elevator columns side-by-side
 
 ---
 
-## 📋 PHASE 4 — Integration & Validation
+## 📋 PHASE 4 - Integration & Validation
 
 > **Status**: 🟢 Completed
 
@@ -163,7 +159,7 @@ D:\Personal\Elevator Simulator\
 
 ---
 
-## 📋 PHASE 5 — Polish, Documentation & Delivery
+## 📋 PHASE 5 - Polish, Documentation & Delivery
 
 > **Status**: 🟡 In Progress
 
@@ -190,4 +186,4 @@ D:\Personal\Elevator Simulator\
 
 ---
 
-*Elevator Simulator — 100% English Unified Specification*
+*Elevator Simulator - 100% English Unified Specification*

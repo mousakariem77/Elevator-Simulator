@@ -1,9 +1,9 @@
-const Elevator          = require('./Elevator');
+const Elevator = require('./Elevator');
 const PassengerElevator = require('./PassengerElevator');
-const Request           = require('./Request');
+const Request = require('./Request');
 
 /**
- * ElevatorSystem — Manager / Dispatcher class.
+ * ElevatorSystem - Manager / Dispatcher class.
  *
  * Responsibilities:
  *  1. Own and orchestrate all Elevator instances.
@@ -18,8 +18,8 @@ const Request           = require('./Request');
  */
 class ElevatorSystem {
   static ELEVATOR_COUNT = 3;
-  static MIN_FLOOR      = 1;
-  static MAX_FLOOR      = 10;
+  static MIN_FLOOR = 1;
+  static MAX_FLOOR = 10;
 
   constructor() {
     // Initialize 3 passenger elevators starting at floor 1
@@ -55,7 +55,7 @@ class ElevatorSystem {
 
     const assigned = this._dispatch(request);
     if (!assigned) {
-      // All elevators busy in opposite direction — add to pending queue
+      // All elevators busy in opposite direction - add to pending queue
       this._pendingQueue.push(request);
     }
 
@@ -94,7 +94,7 @@ class ElevatorSystem {
    */
   setDestination(elevatorId, requestId, destinationFloor) {
     const elevator = this._getElevator(elevatorId);
-    const request  = this._requests.get(requestId);
+    const request = this._requests.get(requestId);
 
     if (!elevator || !request) return false;
     if (!request.isBoarded() && !request.isAssigned()) return false;
@@ -154,7 +154,7 @@ class ElevatorSystem {
       }
     }
 
-    // Retry pending queue — maybe an elevator is now available
+    // Retry pending queue - maybe an elevator is now available
     this._retryPendingQueue();
 
     return events;
@@ -186,11 +186,11 @@ class ElevatorSystem {
   /**
    * Find the best elevator for a request using a 3-tier priority system:
    *
-   * Priority 1 — Non-idle elevator already moving in SAME direction that
+   * Priority 1 - Non-idle elevator already moving in SAME direction that
    *              will pass through the requested floor (SCAN algorithm).
-   *              Only matches elevators currently MOVING — not idle ones.
-   * Priority 2 — Nearest IDLE elevator.
-   * Priority 3 — Any elevator with lowest detour cost (all busy edge case).
+   *              Only matches elevators currently MOVING - not idle ones.
+   * Priority 2 - Nearest IDLE elevator.
+   * Priority 3 - Any elevator with lowest detour cost (all busy edge case).
    *
    * KEY FIX: Idle elevators do NOT compete in Priority 1.
    * Previously isGoingToward() returned true for idle elevators,
@@ -210,12 +210,12 @@ class ElevatorSystem {
       : [...this._elevators.slice(startIdx), ...this._elevators.slice(0, startIdx)];
 
     let bestElevator = null;
-    let bestCost     = Infinity;
+    let bestCost = Infinity;
 
     for (const elevator of ordered) {
       const cost = elevator.costToServe(floor, direction);
       if (cost < bestCost) {
-        bestCost     = cost;
+        bestCost = cost;
         bestElevator = elevator;
       }
     }
@@ -246,9 +246,9 @@ class ElevatorSystem {
         request.assign(elevator.id); // keep assigned status; destination TBD
         // Emit event so frontend shows destination selector
         return {
-          type:      'pickup',
+          type: 'pickup',
           elevatorId: elevator.id,
-          floor:     stop.floor,
+          floor: stop.floor,
           requestId: stop.requestId,
         };
       }
@@ -260,10 +260,10 @@ class ElevatorSystem {
         request.complete();
         elevator.untrackRequest(stop.requestId);
         return {
-          type:       'dropoff',
+          type: 'dropoff',
           elevatorId: elevator.id,
-          floor:      stop.floor,
-          requestId:  stop.requestId,
+          floor: stop.floor,
+          requestId: stop.requestId,
         };
       }
     }
